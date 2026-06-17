@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>XENOMODS Panel</title>
+  <style>
+    :root{
+      --bg:#0a0d12;
+      --bg2:#101520;
+      --card:rgba(17,22,31,.84);
+      --card2:rgba(22,28,40,.94);
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(152,118,255,.18);
+      --text:#eef2fa;
+      --muted:#a8b0c4;
+      --muted2:#7d8598;
+      --accent:#9a7bff;
+      --accent2:#6c84ff;
+      --good:#49d98a;
+      --bad:#ff6b8b;
+      --warn:#ffcb6b;
+      --shadow:0 20px 48px rgba(0,0,0,.38);
+      --shadow2:0 0 0 1px rgba(255,255,255,.03), 0 0 26px rgba(154,123,255,.08);
+      --radius:22px;
+      --sidebar:285px;
+      --topbar:74px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:
+      radial-gradient(circle at 20% 10%, rgba(154,123,255,.16), transparent 28%),
+      radial-gradient(circle at 85% 12%, rgba(108,132,255,.12), transparent 20%),
+      linear-gradient(180deg,#090b10 0%, #0d1118 52%, #0a0d12 100%);
+      color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+    body::before{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.18;
+      background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size:36px 36px
+    }
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    .hidden{display:none !important}
+    .wrap{position:relative;z-index:1;min-height:100vh}
+    .auth-shell{
+      min-height:100vh;display:grid;place-items:center;padding:24px
+    }
+    .auth-card{
+      width:min(980px,100%);
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:linear-gradient(180deg, rgba(17,21,30,.92), rgba(11,14,20,.96));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+    }
+    .auth-left{
+      padding:30px;
+      border-right:1px solid rgba(255,255,255,.06);
+      background:
+        radial-gradient(circle at 18% 20%, rgba(154,123,255,.2), transparent 32%),
+        radial-gradient(circle at 85% 30%, rgba(108,132,255,.16), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      display:flex;flex-direction:column;justify-content:space-between;gap:18px
+    }
+    .brand{
+      display:flex;align-items:center;gap:14px
+    }
+    .logo{
+      width:56px;height:56px;border-radius:18px;display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(154,123,255,.34), rgba(108,132,255,.18));
+      box-shadow:0 0 24px rgba(154,123,255,.2);
+      font-weight:900;font-size:1.04rem
+    }
+    .brand h1{margin:0;font-size:1.15rem;line-height:1.05}
+    .brand p{margin:4px 0 0;color:var(--muted);font-size:.85rem}
+    .hero-title{font-size:2.15rem;line-height:1.05;margin:0;letter-spacing:-.02em}
+    .hero-title span{color:#d9ccff}
+    .hero-desc{color:var(--muted);line-height:1.7;margin:14px 0 0;max-width:55ch}
+    .feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px}
+    .mini{
+      padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)
+    }
+    .mini .k{color:var(--muted);font-size:.8rem}
+    .mini .v{font-weight:800;margin-top:7px}
+    .mini .s{color:var(--muted2);font-size:.8rem;margin-top:5px;line-height:1.45}
+    .auth-right{padding:26px}
+    .tabs{display:flex;gap:8px;margin-bottom:18px;background:rgba(255,255,255,.03);padding:6px;border-radius:18px;border:1px solid rgba(255,255,255,.06)}
+    .tab{
+      flex:1;border:none;border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--muted);
+      background:transparent;font-weight:800
+    }
+    .tab.active{background:linear-gradient(135deg, rgba(154,123,255,.2), rgba(108,132,255,.12));color:#fff}
+    .form{display:grid;gap:12px}
+    .field label{display:block;font-size:.82rem;color:var(--muted);margin:0 0 7px}
+    .input,.select,.textarea{
+      width:100%;padding:13px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,10,14,.9);color:var(--text);outline:none
+    }
+    .input:focus,.select:focus,.textarea:focus{border-color:rgba(154,123,255,.5);box-shadow:0 0 0 3px rgba(154,123,255,.12)}
+    .textarea{min-height:120px;resize:vertical;line-height:1.55}
+    .btn{
+      border:none;cursor:pointer;color:#fff;font-weight:800;padding:12px 14px;border-radius:15px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);transition:.18s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,0,0,.25)}
+    .btn.primary{background:linear-gradient(135deg, rgba(154,123,255,.96), rgba(108,132,255,.58));border-color:transparent}
+    .btn.good{background:linear-gradient(135deg, rgba(73,217,138,.92), rgba(83,190,126,.52));border-color:transparent}
+    .btn.bad{background:linear-gradient(135deg, rgba(255,107,139,.92), rgba(255,142,92,.52));border-color:transparent}
+    .btn.ghost{background:rgba(255,255,255,.03)}
+    .muted{color:var(--muted)}
+    .small{font-size:.84rem;line-height:1.55}
+    .note{
+      padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);color:var(--muted);line-height:1.6;font-size:.86rem
+    }
+    .app{
+      position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:var(--sidebar) 1fr
+    }
+    .sidebar{
+      position:sticky;top:0;height:100vh;padding:16px;border-right:1px solid rgba(255,255,255,.05);
+      background:linear-gradient(180deg, rgba(13,16,23,.95), rgba(9,11,16,.92));
+      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+    }
+    .brand-box{
+      padding:14px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow2);display:flex;align-items:center;gap:12px
+    }
+    .brand-box .logo{width:48px;height:48px;border-radius:16px}
+    .brand-box h2{margin:0;font-size:1rem}
+    .brand-box p{margin:4px 0 0;color:var(--muted);font-size:.82rem}
+    .nav{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+    .nav button{
+      width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:none;border-radius:16px;cursor:pointer;
+      color:var(--muted);background:transparent;text-align:left;font-weight:750;transition:.18s ease
+    }
+    .nav button:hover,.nav button.active{background:linear-gradient(135deg, rgba(154,123,255,.16), rgba(108,132,255,.08));color:#fff}
+    .nav .ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.05)}
+    .sidebox{margin-top:14px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)}
+    .topbar{
+      position:sticky;top:0;z-index:20;min-height:var(--topbar);padding:12px 14px;
+      border:1px solid rgba(255,255,255,.06);border-radius:22px;background:linear-gradient(180deg, rgba(14,17,24,.88), rgba(11,13,18,.74));
+      box-shadow:var(--shadow2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      display:flex;align-items:center;justify-content:space-between;gap:12px
+    }
+    .top-left{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+    .menu{display:none;width:42px;height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#fff}
+    .titles h3{margin:0;font-size:1.02rem}
+    .titles p{margin:4px 0 0;color:var(--muted);font-size:.82rem}
+    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .search{
+      width:min(390px, 48vw);min-width:220px;display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:16px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)
+    }
+    .search input{all:unset;flex:1;color:var(--text);font-size:.95rem}
+    .main{min-width:0;padding:16px;display:flex;flex-direction:column;gap:16px}
+    .page{display:none;animation:fade .18s ease}
+    .page.active{display:block}
+    @keyframes fade{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .grid{display:grid;gap:14px}
+    .g-2{grid-template-columns:repeat(2,1fr)}
+    .g-3{grid-template-columns:repeat(3,1fr)}
+    .g-4{grid-template-columns:repeat(4,1fr)}
+    .card,.panel{
+      border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow2)
+    }
+    .card{padding:16px}
+    .panel{padding:20px}
+    .hero{display:grid;grid-template-columns:1.35fr .85fr;gap:14px}
+    .hero h4{margin:0;font-size:1.5rem;line-height:1.08}
+    .hero h4 span{color:#d9ccff}
+    .hero p{margin:12px 0 0;line-height:1.7;color:var(--muted)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .stat{padding:16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .stat .k{color:var(--muted);font-size:.84rem}
+    .stat .v{font-size:1.85rem;font-weight:900;margin-top:8px}
+    .stat .s{color:var(--muted2);font-size:.8rem;margin-top:7px}
+    .section-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+    .section-head h4{margin:0;font-size:1.02rem}
+    .section-head p{margin:5px 0 0;color:var(--muted);font-size:.85rem}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.06)}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:840px;background:rgba(8,10,14,.3)}
+    th,td{padding:13px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top;text-align:left}
+    th{position:sticky;top:0;background:rgba(14,16,22,.95);backdrop-filter:blur(10px);color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.08em}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .avatar{
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;overflow:hidden;
+      background:linear-gradient(135deg, rgba(154,123,255,.32), rgba(108,132,255,.16));border:1px solid rgba(255,255,255,.08);font-weight:900
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .meta{display:flex;gap:12px;align-items:center}
+    .name{font-weight:850}
+    .sub{color:var(--muted);font-size:.84rem;margin-top:3px;line-height:1.45}
+    .tiny{color:var(--muted2);font-size:.78rem}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{padding:6px 9px;border-radius:999px;font-size:.72rem;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.04);color:var(--muted)}
+    .tag.on{color:#dbffe9;background:rgba(73,217,138,.1);border-color:rgba(73,217,138,.18)}
+    .tag.off{color:#ffdbe4;background:rgba(255,107,139,.1);border-color:rgba(255,107,139,.18)}
+    .tag.warn{color:#ffe6ad;background:rgba(255,203,107,.1);border-color:rgba(255,203,107,.18)}
+    .tag.blue{color:#dfe8ff;background:rgba(108,132,255,.1);border-color:rgba(108,132,255,.18)}
+    .icon-btn{
+      width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.04);color:#fff;cursor:pointer;display:inline-grid;place-items:center
+    }
+    .icon-btn:hover{transform:translateY(-1px)}
+    .icon-btn.bad:hover{border-color:rgba(255,107,139,.35)}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .empty{
+      padding:24px;text-align:center;color:var(--muted);border-radius:18px;background:rgba(255,255,255,.03);
+      border:1px dashed rgba(255,255,255,.1)
+    }
+    .progress{
+      width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden
+    }
+    .progress > div{height:100%;border-radius:inherit;background:linear-gradient(90deg, rgba(154,123,255,.95), rgba(108,132,255,.8))}
+    .kbox{padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;line-height:1.5}
+    .inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .check-list{display:flex;flex-wrap:wrap;gap:8px}
+    .check-pill{
+      display:inline-flex;align-items:center;gap:10px;padding:10px 13px;border-radius:14px;background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);color:var(--muted);font-weight:700;cursor:pointer;user-select:none
+    }
+    .check-pill.on{color:#fff;border-color:rgba(154,123,255,.35);background:rgba(154,123,255,.14)}
+    .check-pill input{accent-color:var(--accent)}
+    .modal-backdrop{
+      position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.58)
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(980px,100%);max-height:calc(100vh - 32px);overflow:auto;
+      border-radius:26px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(18,22,30,.98), rgba(12,15,21,.98));
+      box-shadow:var(--shadow)
+    }
+    .modal-head{
+      position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(15,18,25,.97)
+    }
+    .modal-head h4{margin:0;font-size:1.02rem}
+    .modal-body{padding:18px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+    .close{
+      width:40px;height:40px;border:none;border-radius:12px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer
+    }
+    .toast-wrap{
+      position:fixed;right:16px;bottom:16px;z-index:1200;display:flex;flex-direction:column;gap:10px;pointer-events:none
+    }
+    .toast{
+      min-width:220px;max-width:330px;padding:12px 14px;border-radius:16px;background:rgba(14,16,24,.97);
+      border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(0,0,0,.35);pointer-events:auto
+    }
+    .toast .t{font-weight:850;margin-bottom:4px}
+    .toast .m{color:var(--muted);font-size:.88rem;line-height:1.45}
+    .toast.success{border-color:rgba(73,217,138,.2)}
+    .toast.error{border-color:rgba(255,107,139,.22)}
+    .toggle{
+      display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none
+    }
+    .toggle input{position:absolute;opacity:0;width:0;height:0}
+    .toggle .track{
+      width:40px;height:22px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);position:relative;transition:.18s ease
+    }
+    .toggle .track::after{
+      content:"";position:absolute;width:16px;height:16px;border-radius:50%;top:2px;left:2px;background:#fff;transition:.18s ease
+    }
+    .toggle input:checked + .track{background:var(--accent);border-color:var(--accent)}
+    .toggle input:checked + .track::after{transform:translateX(18px)}
+    .badge{
+      display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);font-size:.76rem;font-weight:800;letter-spacing:.02em
+    }
+    .badge.admin{color:#f6e8ff;background:rgba(154,123,255,.16)}
+    .badge.user{color:#e3f0ff;background:rgba(108,132,255,.14)}
+    .badge.other{color:#fff7df;background:rgba(255,203,107,.12)}
+    .flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .divider{height:1px;background:rgba(255,255,255,.06);margin:14px 0}
+    .stats-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    @media (max-width: 1120px){
+      .auth-card,.hero,.g-4,.g-3,.g-2,.stats-3,.stats-2{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 900px){
+      .app{grid-template-columns:1fr}
+      .sidebar{
+        position:fixed;inset:0 auto 0 0;width:min(88vw,320px);transform:translateX(-102%);
+        transition:transform .25s ease;z-index:900;box-shadow:24px 0 60px rgba(0,0,0,.45)
+      }
+      .sidebar.open{transform:translateX(0)}
+      .menu{display:inline-grid;place-items:center}
+      .topbar{flex-wrap:wrap;border-radius:18px}
+      .top-left,.top-right{width:100%}
+      .search{width:100%;min-width:0}
+      .main{padding:14px}
+      .auth-card{grid-template-columns:1fr}
+      .auth-left{border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
+    }
+    @media (max-width: 640px){
+      .hero,.g-4,.g-3,.g-2,.stats-3,.stats-2,.feature-grid{grid-template-columns:1fr}
+      .panel,.card,.modal,.auth-card{border-radius:18px}
+      .btn{width:100%}
+      .top-right .btn{width:auto;flex:1 1 0}
+      table{min-width:760px}
+      .auth-shell{padding:12px}
+      .auth-right,.auth-left{padding:18px}
+      .hero-title{font-size:1.8rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+  <div id="appRoot"></div>
+
+<script>
+(() => {
+  const STORAGE = 'xenomods_panel_v2';
+  const ADMIN_USER = 'XENOMODS';
+  const ADMIN_PASS = '0102554FF';
+
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const appRoot = $('#appRoot');
+  const modalBackdrop = $('#modalBackdrop');
+  const toastWrap = $('#toastWrap');
+
+  let state = loadState();
+  let currentPage = 'dashboard';
+  let currentTab = 'login';
+  let uiSearch = '';
+
+  function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
+  function now(){ return new Date().toISOString(); }
+  function money(n){ return '฿' + Number(n || 0).toLocaleString('th-TH'); }
+  function esc(s=''){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function dateFmt(dt, opts={dateStyle:'medium', timeStyle:'short'}){ try { return new Intl.DateTimeFormat('th-TH', opts).format(new Date(dt)); } catch { return dt || '-'; } }
+  function todayKey(dt=Date.now()){ return new Date(dt).toDateString(); }
+
+  function seedState(){
+    const adminId = 'admin_root';
+    const u1 = {id:'user_1', username:'dealer1', displayName:'Dealer One', password:'1234', email:'dealer1@xeno.local', role:'dealer', status:'active', createdAt:now(), todaySales:1200, monthSales:15200, totalSales:52000, targetToday:3000, targetMonth:50000, rank:'Silver', visibleKeyIds:[]};
+    const u2 = {id:'user_2', username:'dealer2', displayName:'Dealer Two', password:'1234', email:'dealer2@xeno.local', role:'user', status:'active', createdAt:now(), todaySales:850, monthSales:9800, totalSales:21100, targetToday:2500, targetMonth:40000, rank:'Bronze', visibleKeyIds:[]};
+    const u3 = {id:'user_3', username:'viewer', displayName:'Read Only', password:'1234', email:'viewer@xeno.local', role:'read-only', status:'active', createdAt:now(), todaySales:0, monthSales:0, totalSales:0, targetToday:0, targetMonth:0, rank:'Guest', visibleKeyIds:[]};
+    const keys = [
+      {id:'key_1', value:'XM-FF-2026-0001', category:'Free Fire', status:'stock', note:'ชุดเริ่มต้น', assignedTo:null, visibleTo:['all'], createdAt:now(), issuedAt:null, expiresAt:'', visible:true},
+      {id:'key_2', value:'XM-FF-2026-0002', category:'Free Fire', status:'assigned', note:'ให้ dealer1 ดูได้', assignedTo:'user_1', visibleTo:['user_1'], createdAt:now(), issuedAt:now(), expiresAt:'', visible:true},
+      {id:'key_3', value:'XM-FF-2026-0003', category:'Free Fire', status:'hidden', note:'ซ่อนจาก user ทั่วไป', assignedTo:null, visibleTo:['admin_root'], createdAt:now(), issuedAt:null, expiresAt:'', visible:false},
+      {id:'key_4', value:'XM-FF-2026-0004', category:'Free Fire', status:'stock', note:'เปิดให้ dealer1 และ dealer2', assignedTo:null, visibleTo:['user_1','user_2'], createdAt:now(), issuedAt:null, expiresAt:'', visible:true}
+    ];
+    return {
+      session:{userId:null, token:null, remember:false},
+      users:[
+        {id:adminId, username:ADMIN_USER, displayName:'XENO ADMIN', password:ADMIN_PASS, email:'admin@xenomods.local', role:'superadmin', status:'active', createdAt:now(), todaySales:0, monthSales:0, totalSales:0, targetToday:0, targetMonth:0, rank:'Owner', visibleKeyIds:['key_1','key_2','key_3','key_4']},
+        u1, u2, u3
+      ],
+      keys,
+      announcements:[
+        {id:'ann_1', title:'ยินดีต้อนรับ XENOMODS', body:'ระบบตัวอย่างนี้ทำงานแบบหน้าเดียว มีล็อกอิน สมัครสมาชิก และแยกสิทธิ์ Admin/User แล้ว', pinned:true, createdAt:now(), authorId:adminId}
+      ],
+      logs:[],
+      settings:{
+        systemName:'XENOMODS',
+        tagline:'ระบบแผงตัวแทนจำหน่าย',
+        maintenance:false,
+        publicRegistration:true,
+        passwordPolicy:'min4',
+        announceNewKey:true
+      }
+    };
+  }
+
+  function normalize(raw){
+    const seed = seedState();
+    if(!raw || typeof raw !== 'object') return seed;
+    return {
+      session: { ...seed.session, ...(raw.session || {}) },
+      users: Array.isArray(raw.users) && raw.users.length ? raw.users.map(u => ({
+        id: u.id || uid('user'),
+        username: String(u.username || '').trim(),
+        displayName: String(u.displayName || u.username || 'User').trim(),
+        password: String(u.password || '1234'),
+        email: String(u.email || ''),
+        role: String(u.role || 'user'),
+        status: String(u.status || 'active'),
+        createdAt: u.createdAt || now(),
+        todaySales: Number(u.todaySales || 0),
+        monthSales: Number(u.monthSales || 0),
+        totalSales: Number(u.totalSales || 0),
+        targetToday: Number(u.targetToday || 0),
+        targetMonth: Number(u.targetMonth || 0),
+        rank: String(u.rank || 'User'),
+        visibleKeyIds: Array.isArray(u.visibleKeyIds) ? u.visibleKeyIds : []
+      })) : seed.users,
+      keys: Array.isArray(raw.keys) ? raw.keys.map(k => ({
+        id: k.id || uid('key'),
+        value: String(k.value || '').trim(),
+        category: String(k.category || 'Free Fire'),
+        status: String(k.status || 'stock'),
+        note: String(k.note || ''),
+        assignedTo: k.assignedTo || null,
+        visibleTo: Array.isArray(k.visibleTo) ? k.visibleTo : ['all'],
+        createdAt: k.createdAt || now(),
+        issuedAt: k.issuedAt || null,
+        expiresAt: k.expiresAt || '',
+        visible: k.visible !== false
+      })) : seed.keys,
+      announcements: Array.isArray(raw.announcements) ? raw.announcements : seed.announcements,
+      logs: Array.isArray(raw.logs) ? raw.logs : seed.logs,
+      settings: { ...seed.settings, ...(raw.settings || {}) }
+    };
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE);
+      if(!raw) return seedState();
+      return normalize(JSON.parse(raw));
+    }catch(e){
+      return seedState();
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE, JSON.stringify(state));
+  }
+
+  function currentUser(){
+    return state.users.find(u => u.id === state.session.userId) || null;
+  }
+
+  function isAdmin(user=currentUser()){
+    if(!user) return false;
+    return ['superadmin','owner','admin','moderator'].includes(user.role);
+  }
+
+  function isSuper(user=currentUser()){
+    return !!user && ['superadmin','owner'].includes(user.role);
+  }
+
+  function canManageUsers(user=currentUser()){
+    return !!user && ['superadmin','owner','admin'].includes(user.role);
+  }
+
+  function canManageKeys(user=currentUser()){
+    return !!user && ['superadmin','owner','admin'].includes(user.role);
+  }
+
+  function canManageAnnouncements(user=currentUser()){
+    return !!user && ['superadmin','owner','admin','moderator'].includes(user.role);
+  }
+
+  function canViewLogs(user=currentUser()){
+    return !!user && ['superadmin','owner','admin'].includes(user.role);
+  }
+
+  function visibleKeysFor(user=currentUser()){
+    if(!user) return [];
+    if(isAdmin(user)) return state.keys;
+    return state.keys.filter(k => {
+      const list = Array.isArray(k.visibleTo) ? k.visibleTo : [];
+      return list.includes('all') || list.includes(user.id) || k.assignedTo === user.id;
+    });
+  }
+
+  function userVisibleStats(user=currentUser()){
+    const keys = visibleKeysFor(user);
+    const visible = keys.length;
+    const assigned = keys.filter(k => k.assignedTo === user.id).length;
+    const visibleAll = keys.filter(k => (k.visibleTo || []).includes('all')).length;
+    return { visible, assigned, visibleAll };
+  }
+
+  function toast(title, message, type='success'){
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML = `<div class="t">${esc(title)}</div><div class="m">${esc(message)}</div>`;
+    toastWrap.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(8px)';
+      el.style.transition = 'all .22s ease';
+    }, 2400);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  function log(action, detail='', targetId=''){
+    const actor = currentUser();
+    state.logs.unshift({
+      id: uid('log'),
+      action,
+      detail,
+      actorId: actor ? actor.id : 'system',
+      actorName: actor ? actor.displayName : 'System',
+      targetId,
+      time: now()
+    });
+    state.logs = state.logs.slice(0, 200);
+    saveState();
+  }
+
+  function openModal(html){
+    modalBackdrop.innerHTML = html;
+    modalBackdrop.classList.add('show');
+    modalBackdrop.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeModal(){
+    modalBackdrop.classList.remove('show');
+    modalBackdrop.setAttribute('aria-hidden', 'true');
+    modalBackdrop.innerHTML = '';
+  }
+
+  function modalShell(title, body, actions=''){
+    return `
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <h4>${esc(title)}</h4>
+          <button class="close" data-close>✕</button>
+        </div>
+        <div class="modal-body">
+          ${body}
+          ${actions ? `<div class="modal-actions">${actions}</div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function roleBadge(role){
+    const map = {
+      superadmin: ['admin','Owner'],
+      owner: ['admin','Owner'],
+      admin: ['admin','Admin'],
+      moderator: ['other','Moderator'],
+      dealer: ['other','Dealer'],
+      user: ['user','User'],
+      'read-only': ['other','Read Only']
+    };
+    const pair = map[role] || ['other', role || 'User'];
+    return `<span class="badge ${pair[0]}">${esc(pair[1])}</span>`;
+  }
+
+  function progressValue(current, target){
+    if(!target) return 0;
+    return Math.max(0, Math.min(100, Math.round((Number(current || 0) / Number(target || 1)) * 100)));
+  }
+
+  function seedIfNeeded(){
+    if(!state.users.length) state = seedState();
+    if(!state.session) state.session = {userId:null, token:null, remember:false};
+  }
+
+  function setPage(page){
+    currentPage = page;
+    $$('.nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.page === page));
+    renderPage();
+  }
+
+  function renderAuth(){
+    const adminHint = `แอดมินเข้าใช้งานด้วย ${ADMIN_USER} / ${ADMIN_PASS}`;
+    appRoot.innerHTML = `
+      <div class="auth-shell">
+        <div class="auth-card">
+          <div class="auth-left">
+            <div>
+              <div class="brand">
+                <div class="logo">XM</div>
+                <div>
+                  <h1>XENOMODS PANEL</h1>
+                  <p>ระบบตัวแทนจำหน่าย + Admin/User Access</p>
+                </div>
+              </div>
+              <h2 class="hero-title" style="margin-top:24px">ล็อกอินก่อนเข้า <span>หน้าหลัก</span></h2>
+              <p class="hero-desc">
+                ระบบนี้แยกสิทธิ์ชัดเจน: Admin จัดการทุกอย่าง, User ดูเฉพาะข้อมูลที่ได้รับอนุญาต
+                รวมถึงคีย์ที่ถูกกำหนดให้เห็นเท่านั้น
+              </p>
+              <div class="feature-grid">
+                <div class="mini"><div class="k">Admin Control</div><div class="v">จัดการทุกอย่าง</div><div class="s">ผู้ใช้, คีย์, สิทธิ์, log, ประกาศ, backup</div></div>
+                <div class="mini"><div class="k">User Access</div><div class="v">ดูของตัวเอง</div><div class="s">ยอดวันนี้, เป้า, คีย์ที่อนุญาต, อันดับแบบจำกัด</div></div>
+                <div class="mini"><div class="k">Key Visibility</div><div class="v">กำหนดได้</div><div class="s">เปิดให้ดูรายคน / ดูทุกคน / ซ่อนเฉพาะบางคีย์</div></div>
+                <div class="mini"><div class="k">Local Demo</div><div class="v">ไฟล์เดียว</div><div class="s">เก็บข้อมูลในเครื่องด้วย LocalStorage</div></div>
+              </div>
+            </div>
+            <div class="note">${adminHint}</div>
+          </div>
+          <div class="auth-right">
+            <div class="tabs">
+              <button class="tab ${currentTab==='login'?'active':''}" data-tab="login">เข้าสู่ระบบ</button>
+              <button class="tab ${currentTab==='register'?'active':''}" data-tab="register">สมัครสมาชิก</button>
+            </div>
+            <div id="authFormArea"></div>
+            <div class="divider"></div>
+            <div class="small muted">
+              คำเตือน: ระบบนี้เป็นตัวอย่างหน้าเว็บแบบ standalone ใช้บัญชีในเครื่องนี้เท่านั้น
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    $('#authFormArea').innerHTML = currentTab === 'login' ? loginForm() : registerForm();
+  }
+
+  function loginForm(){
+    return `
+      <form class="form" id="loginForm">
+        <div class="field">
+          <label>ชื่อผู้ใช้</label>
+          <input class="input" name="username" placeholder="XENOMODS หรือ username ของคุณ" required />
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน</label>
+          <input class="input" type="password" name="password" placeholder="••••••••" required />
+        </div>
+        <label class="toggle small"><input type="checkbox" name="remember" /><span class="track"></span>จำฉันไว้ในเครื่องนี้</label>
+        <button class="btn primary" type="submit">เข้าสู่ระบบ</button>
+        <div class="note">Admin Default: <b>XENOMODS</b> / <b>0102554FF</b></div>
+      </form>
+    `;
+  }
+
+  function registerForm(){
+    return `
+      <form class="form" id="registerForm">
+        <div class="field">
+          <label>ชื่อผู้ใช้</label>
+          <input class="input" name="username" placeholder="ตั้งชื่อผู้ใช้" required />
+        </div>
+        <div class="field">
+          <label>ชื่อแสดงผล</label>
+          <input class="input" name="displayName" placeholder="ชื่อที่แสดงในระบบ" required />
+        </div>
+        <div class="field">
+          <label>อีเมล</label>
+          <input class="input" type="email" name="email" placeholder="name@example.com" />
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน</label>
+          <input class="input" type="password" name="password" placeholder="ตั้งรหัสผ่าน" required />
+        </div>
+        <button class="btn good" type="submit">สมัครสมาชิก</button>
+        <div class="note">ผู้ใช้ที่สมัครใหม่จะได้รับ role = <b>User</b> โดยอัตโนมัติ</div>
+      </form>
+    `;
+  }
+
+  function renderApp(){
+    const user = currentUser();
+    if(!user){ renderAuth(); return; }
+    const navItems = navFor(user);
+    appRoot.innerHTML = `
+      <div class="app">
+        <aside class="sidebar" id="sidebar">
+          <div class="brand-box">
+            <div class="logo">XM</div>
+            <div>
+              <h2>${esc(state.settings.systemName || 'XENOMODS')}</h2>
+              <p>${esc(state.settings.tagline || 'ระบบแผงตัวแทนจำหน่าย')}</p>
+            </div>
+          </div>
+          <div class="nav" id="nav">
+            ${navItems.map(item => `
+              <button data-page="${item.id}" class="${item.id===currentPage?'active':''}">
+                <span class="ic">${item.icon}</span>${esc(item.label)}
+              </button>
+            `).join('')}
+          </div>
+          <div class="sidebox">
+            <div class="inline">
+              <span class="badge ${isAdmin(user) ? 'admin' : 'user'}">${esc(user.displayName)}</span>
+              ${roleBadge(user.role)}
+            </div>
+            <div class="small muted" style="margin-top:10px">เข้าสู่ระบบ: ${dateFmt(now())}</div>
+            <div class="small muted">สถานะ: ${esc(user.status)}</div>
+            <div class="small muted">บัญชี: ${esc(user.username)}</div>
+          </div>
+          <div class="sidebox">
+            <div class="small muted">ข้อมูลในเครื่องนี้จะถูกบันทึกด้วย LocalStorage</div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <header class="topbar">
+            <div class="top-left">
+              <button class="menu" id="menuBtn">☰</button>
+              <div class="titles">
+                <h3 id="pageTitle"></h3>
+                <p id="pageSub"></p>
+              </div>
+            </div>
+            <div class="top-right">
+              <div class="search">
+                <span class="tiny">⌕</span>
+                <input id="globalSearch" placeholder="ค้นหา..." value="${esc(uiSearch)}" />
+              </div>
+              ${isAdmin(user) ? '<button class="btn primary" data-act="new-key">+ Key</button>' : ''}
+              ${canManageUsers(user) ? '<button class="btn" data-act="new-user">+ User</button>' : ''}
+              <button class="btn bad" data-act="logout">ออกจากระบบ</button>
+            </div>
+          </header>
+
+          <div id="pageRoot"></div>
+        </main>
+      </div>
+    `;
+    $('#pageTitle').textContent = titleFor(currentPage, user);
+    $('#pageSub').textContent = subFor(currentPage, user);
+    renderPage();
+  }
+
+  function navFor(user){
+    if(isAdmin(user)){
+      return [
+        {id:'dashboard', label:'Dashboard', icon:'▣'},
+        {id:'users', label:'Users', icon:'◉'},
+        {id:'keys', label:'Keys', icon:'⌁'},
+        {id:'visibility', label:'Key Visibility', icon:'◫'},
+        {id:'announcements', label:'Announcements', icon:'✦'},
+        {id:'reports', label:'Reports', icon:'▤'},
+        {id:'logs', label:'Logs', icon:'✎'},
+        {id:'settings', label:'Settings', icon:'⚙'}
+      ];
+    }
+    return [
+      {id:'dashboard', label:'My Dashboard', icon:'▣'},
+      {id:'mykeys', label:'My Keys', icon:'⌁'},
+      {id:'dealers', label:'Dealers', icon:'◉'},
+      {id:'announcements', label:'Announcements', icon:'✦'},
+      {id:'profile', label:'Profile', icon:'⚑'}
+    ];
+  }
+
+  function titleFor(page, user){
+    const mapAdmin = {
+      dashboard:'Dashboard',
+      users:'User Management',
+      keys:'Key Center',
+      visibility:'Visibility Control',
+      announcements:'Announcements',
+      reports:'Reports & Rankings',
+      logs:'Audit Logs',
+      settings:'System Settings'
+    };
+    const mapUser = {
+      dashboard:'My Dashboard',
+      mykeys:'My Keys',
+      dealers:'Dealers',
+      announcements:'Announcements',
+      profile:'Profile'
+    };
+    return (isAdmin(user) ? mapAdmin : mapUser)[page] || 'XENOMODS';
+  }
+
+  function subFor(page, user){
+    const mapAdmin = {
+      dashboard:'รวมข้อมูลทุกอย่างในระบบ',
+      users:'จัดการบัญชี, ยศ, สถานะ, เป้า',
+      keys:'เพิ่มคีย์, แก้ไข, แจก, คืน, กำหนดผู้เห็น',
+      visibility:'กำหนดว่า user คนไหนดูคีย์อะไรได้บ้าง',
+      announcements:'ประกาศข่าวและแจ้งเตือนในระบบ',
+      reports:'ยอดขาย, เป้า, และอันดับ',
+      logs:'ประวัติการใช้งานทั้งหมด',
+      settings:'สำรองข้อมูล และตั้งค่าระบบ'
+    };
+    const mapUser = {
+      dashboard:'ดูยอดของตัวเองและคีย์ที่ได้รับอนุญาต',
+      mykeys:'ดูคีย์ตามสิทธิ์ที่กำหนดเท่านั้น',
+      dealers:'ดูอันดับตัวแทนแบบจำกัด',
+      announcements:'ข่าวสารจากแอดมิน',
+      profile:'แก้โปรไฟล์และรหัสผ่าน'
+    };
+    return (isAdmin(user) ? mapAdmin : mapUser)[page] || '';
+  }
+
+  function filteredSearch(list, fields){
+    const q = uiSearch.trim().toLowerCase();
+    if(!q) return list;
+    return list.filter(item => fields(item).toLowerCase().includes(q));
+  }
+
+  function renderPage(){
+    const user = currentUser();
+    if(!user){ renderAuth(); return; }
+    const root = $('#pageRoot');
+    const common = {
+      dashboard: () => isAdmin(user) ? adminDashboard() : userDashboard(),
+      users: () => usersPage(),
+      keys: () => keysPage(),
+      visibility: () => visibilityPage(),
+      announcements: () => announcementsPage(),
+      reports: () => reportsPage(),
+      logs: () => logsPage(),
+      settings: () => settingsPage(),
+      mykeys: () => myKeysPage(),
+      dealers: () => dealersPage(),
+      profile: () => profilePage()
+    };
+    if(!common[currentPage]){
+      currentPage = isAdmin(user) ? 'dashboard' : 'dashboard';
+    }
+    root.innerHTML = `<section class="page active">${common[currentPage]()}</section>`;
+    bindPageEvents();
+    saveState();
+  }
+
+  function adminDashboard(){
+    const totalUsers = state.users.length;
+    const activeUsers = state.users.filter(u => u.status === 'active').length;
+    const totalKeys = state.keys.length;
+    const stockKeys = state.keys.filter(k => k.status === 'stock').length;
+    const assignedKeys = state.keys.filter(k => k.status === 'assigned').length;
+    const hiddenKeys = state.keys.filter(k => k.status === 'hidden').length;
+    const todaySales = state.users.reduce((a,u) => a + Number(u.todaySales||0), 0);
+    const monthSales = state.users.reduce((a,u) => a + Number(u.monthSales||0), 0);
+    const topUser = [...state.users].sort((a,b) => Number(b.monthSales||0) - Number(a.monthSales||0))[0];
+    const topToday = [...state.users].sort((a,b) => Number(b.todaySales||0) - Number(a.todaySales||0))[0];
+    return `
+      <div class="hero">
+        <div class="panel">
+          <h4>XENOMODS <span>Admin Control Center</span></h4>
+          <p>มุมมองผู้ดูแลระบบ: จัดการสมาชิก คีย์ การมองเห็นข่าวประกาศ และบันทึกการใช้งานทั้งหมด</p>
+          <div class="actions">
+            <button class="btn primary" data-act="new-user">+ เพิ่ม User</button>
+            <button class="btn" data-act="new-key">+ เพิ่ม Key</button>
+            <button class="btn" data-act="new-announcement">+ ประกาศ</button>
+            <button class="btn ghost" data-act="export-json">Export JSON</button>
+          </div>
+          <div class="grid g-4" style="margin-top:16px">
+            <div class="stat"><div class="k">Users</div><div class="v">${totalUsers}</div><div class="s">Active: ${activeUsers}</div></div>
+            <div class="stat"><div class="k">Keys</div><div class="v">${totalKeys}</div><div class="s">Stock: ${stockKeys} / Issued: ${assignedKeys}</div></div>
+            <div class="stat"><div class="k">Hidden Keys</div><div class="v">${hiddenKeys}</div><div class="s">ซ่อนจาก user ทั่วไป</div></div>
+            <div class="stat"><div class="k">Sales</div><div class="v">${money(monthSales)}</div><div class="s">เดือนนี้ทั้งหมด</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="flex-between">
+            <div>
+              <div class="tiny">Top today</div>
+              <div class="name" style="font-size:1.1rem;margin-top:4px">${esc(topToday ? topToday.displayName : '-')}</div>
+              <div class="sub">${topToday ? money(topToday.todaySales) : '-'}</div>
+            </div>
+            <div class="badge admin">Owner</div>
+          </div>
+          <div class="divider"></div>
+          <div class="tiny">ยอดรวมทุก user วันนี้</div>
+          <div class="v" style="font-size:1.9rem;font-weight:900;margin-top:6px">${money(todaySales)}</div>
+          <div class="divider"></div>
+          <div class="tiny">Top monthly</div>
+          <div class="name" style="margin-top:6px">${esc(topUser ? topUser.displayName : '-')}</div>
+          <div class="sub">${topUser ? money(topUser.monthSales) : '-'}</div>
+          <div class="divider"></div>
+          <div class="tiny">สถานะระบบ</div>
+          <div style="margin-top:6px"><span class="tag ${state.settings.maintenance ? 'warn' : 'on'}">${state.settings.maintenance ? 'Maintenance' : 'Online'}</span></div>
+        </div>
+      </div>
+
+      <div class="grid g-4" style="margin-top:14px">
+        <div class="stat"><div class="k">Today Sales</div><div class="v">${money(todaySales)}</div></div>
+        <div class="stat"><div class="k">Month Sales</div><div class="v">${money(monthSales)}</div></div>
+        <div class="stat"><div class="k">Visible Keys</div><div class="v">${state.keys.filter(k => (k.visibleTo||[]).includes('all') || k.visible).length}</div></div>
+        <div class="stat"><div class="k">Logs</div><div class="v">${state.logs.length}</div></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="section-head">
+          <div><h4>Recent Activity</h4><p>กิจกรรมล่าสุดของระบบ</p></div>
+          <button class="btn" data-act="go-logs">Open Logs</button>
+        </div>
+        ${recentActivity()}
+      </div>
+    `;
+  }
+
+  function userDashboard(){
+    const stats = userVisibleStats(user);
+    const progressToday = progressValue(user.todaySales, user.targetToday);
+    const progressMonth = progressValue(user.monthSales, user.targetMonth);
+    const dealers = state.users.filter(u => u.role !== 'superadmin' && u.status === 'active')
+      .sort((a,b) => Number(b.monthSales||0) - Number(a.monthSales||0)).slice(0,5);
+    const visible = visibleKeysFor(user).slice(0,6);
+    return `
+      <div class="hero">
+        <div class="panel">
+          <h4>สวัสดี, <span>${esc(user.displayName)}</span></h4>
+          <p>คุณดูได้เฉพาะข้อมูลของตัวเองและคีย์ที่แอดมินอนุญาตเท่านั้น ระบบจะแสดงข้อมูลแบบจำกัดเพื่อความปลอดภัย</p>
+          <div class="actions">
+            <button class="btn primary" data-act="page-mykeys">My Keys</button>
+            <button class="btn" data-act="page-announcements">Announcements</button>
+            <button class="btn ghost" data-act="page-dealers">Dealers</button>
+          </div>
+          <div class="grid g-3" style="margin-top:16px">
+            <div class="stat"><div class="k">Today Sales</div><div class="v">${money(user.todaySales)}</div><div class="s">เป้าวันนี้ ${money(user.targetToday)}</div></div>
+            <div class="stat"><div class="k">Month Sales</div><div class="v">${money(user.monthSales)}</div><div class="s">เป้าเดือนนี้ ${money(user.targetMonth)}</div></div>
+            <div class="stat"><div class="k">Visible Keys</div><div class="v">${stats.visible}</div><div class="s">Assigned: ${stats.assigned}</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="flex-between">
+            <div>
+              <div class="tiny">Rank</div>
+              <div class="name" style="font-size:1.15rem;margin-top:5px">${esc(user.rank || 'User')}</div>
+            </div>
+            ${roleBadge(user.role)}
+          </div>
+          <div class="divider"></div>
+          <div class="tiny">เป้าวันนี้</div>
+          <div class="progress" style="margin-top:8px"><div style="width:${progressToday}%"></div></div>
+          <div class="small muted" style="margin-top:8px">${progressToday}% (${money(user.todaySales)} / ${money(user.targetToday)})</div>
+          <div class="divider"></div>
+          <div class="tiny">เป้าเดือนนี้</div>
+          <div class="progress" style="margin-top:8px"><div style="width:${progressMonth}%"></div></div>
+          <div class="small muted" style="margin-top:8px">${progressMonth}% (${money(user.monthSales)} / ${money(user.targetMonth)})</div>
+        </div>
+      </div>
+
+      <div class="grid g-3" style="margin-top:14px">
+        <div class="stat"><div class="k">วันนี้</div><div class="v">${money(user.todaySales)}</div><div class="s">ยอดที่ทำได้</div></div>
+        <div class="stat"><div class="k">เดือนนี้</div><div class="v">${money(user.monthSales)}</div><div class="s">ยอดที่ทำได้</div></div>
+        <div class="stat"><div class="k">ผลต่างถึงเป้า</div><div class="v">${money(Math.max(0, user.targetToday - user.todaySales))}</div><div class="s">เหลืออีกเท่าไร</div></div>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card">
+          <div class="section-head"><div><h4>คีย์ที่มองเห็นได้</h4><p>ดูได้ตามสิทธิ์ที่แอดมินกำหนด</p></div><button class="btn" data-act="page-mykeys">Open</button></div>
+          ${miniKeyList(visible, user)}
+        </div>
+        <div class="card">
+          <div class="section-head"><div><h4>ตัวแทนอื่น (แบบจำกัด)</h4><p>แสดงอันดับ/ยอดสรุปเบื้องต้น</p></div><button class="btn" data-act="page-dealers">Open</button></div>
+          ${miniDealerList(dealers, user)}
+        </div>
+      </div>
+    `;
+  }
+
+  function recentActivity(){
+    const items = state.logs.slice(0,5);
+    if(!items.length) return `<div class="empty">ยังไม่มี log</div>`;
+    return items.map(l => `
+      <div class="flex-between" style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <div>
+          <div class="name">${esc(l.action)}</div>
+          <div class="sub">${esc(l.detail || '')}</div>
+          <div class="tiny">${esc(l.actorName)} • ${dateFmt(l.time)}</div>
+        </div>
+        <div class="badge other">${esc(l.actorName)}</div>
+      </div>
+    `).join('');
+  }
+
+  function miniKeyList(keys, user){
+    if(!keys.length) return `<div class="empty">ไม่มีคีย์ที่มองเห็นได้</div>`;
+    return `<div class="grid" style="gap:10px">${keys.map(k => `
+      <div class="kbox">
+        <div class="inline" style="justify-content:space-between">
+          <div class="mono">${esc(k.value)}</div>
+          <span class="tag ${k.status==='stock' ? 'on' : k.status==='assigned' ? 'blue' : 'warn'}">${esc(k.status)}</span>
+        </div>
+        <div class="sub">${esc(k.note || 'No note')}</div>
+        <div class="tiny">Visible to you: ${k.visibleTo && (k.visibleTo.includes('all') || k.visibleTo.includes(user.id) || k.assignedTo===user.id) ? 'Yes' : 'No'}</div>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  function miniDealerList(items, user){
+    if(!items.length) return `<div class="empty">ไม่มีข้อมูล</div>`;
+    return `<div class="grid" style="gap:10px">${items.map((u, i) => `
+      <div class="kbox">
+        <div class="flex-between">
+          <div>
+            <div class="name">${i+1}. ${esc(u.displayName)}</div>
+            <div class="sub">${esc(u.role)} • ${esc(u.rank || 'Rank')}</div>
+          </div>
+          <span class="tag ${u.id===user.id ? 'on' : 'blue'}">${u.id===user.id ? 'You' : 'Dealer'}</span>
+        </div>
+        <div class="tiny" style="margin-top:8px">Today: ${money(u.todaySales)} • Month: ${money(u.monthSales)}</div>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  function usersPage(){
+    if(!canManageUsers()) return permissionDenied();
+    const list = filteredSearch(state.users, u => `${u.username} ${u.displayName} ${u.email} ${u.role} ${u.status}`);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>User Management</h4><p>เพิ่ม แก้ไข ลบ ตั้งยศ เป้าหมาย และสถานะการใช้งาน</p></div>
+          <div class="toolbar">
+            <input class="input" id="pageSearch" placeholder="ค้นหา user..." style="min-width:220px;flex:1" />
+            <button class="btn primary" data-act="new-user">+ User</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th><th>Role</th><th>Targets / Sales</th><th>Status</th><th>Visible Keys</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(u => userRow(u)).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${list.length ? '' : '<div class="empty" style="margin-top:12px">ไม่พบผู้ใช้</div>'}
+      </div>
+    `;
+  }
+
+  function userRow(u){
+    const visibleCount = visibleKeysFor(u).length;
+    return `
+      <tr>
+        <td>
+          <div class="meta">
+            <div class="avatar">${esc((u.displayName || u.username || 'U').slice(0,2).toUpperCase())}</div>
+            <div>
+              <div class="name">${esc(u.displayName)}</div>
+              <div class="sub">@${esc(u.username)} ${u.id === currentUser().id ? '(you)' : ''}</div>
+              <div class="tiny">${esc(u.email || '')}</div>
+            </div>
+          </div>
+        </td>
+        <td>${roleBadge(u.role)}</td>
+        <td>
+          <div class="tiny">Today ${money(u.todaySales)} / ${money(u.targetToday)}</div>
+          <div class="progress" style="margin:8px 0"><div style="width:${progressValue(u.todaySales, u.targetToday)}%"></div></div>
+          <div class="tiny">Month ${money(u.monthSales)} / ${money(u.targetMonth)}</div>
+          <div class="progress" style="margin:8px 0"><div style="width:${progressValue(u.monthSales, u.targetMonth)}%"></div></div>
+        </td>
+        <td><span class="tag ${u.status === 'active' ? 'on' : 'off'}">${esc(u.status)}</span></td>
+        <td><span class="tag blue">${visibleCount}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" data-act="edit-user" data-id="${u.id}">✎</button>
+            <button class="icon-btn" data-act="user-keys" data-id="${u.id}">⌁</button>
+            <button class="icon-btn bad" data-act="delete-user" data-id="${u.id}">⌫</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function keysPage(){
+    const user = currentUser();
+    const items = isAdmin(user) ? state.keys : visibleKeysFor(user);
+    const list = filteredSearch(items, k => `${k.value} ${k.category} ${k.status} ${(k.note||'')} ${k.assignedTo||''}`);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>${isAdmin(user) ? 'Key Center' : 'My Keys'}</h4><p>${isAdmin(user) ? 'จัดการคีย์ทั้งหมดและกำหนดสิทธิ์การมองเห็น' : 'แสดงเฉพาะคีย์ที่แอดมินอนุญาตเท่านั้น'}</p></div>
+          <div class="toolbar">
+            <input class="input" id="pageSearch" placeholder="ค้นหา key..." style="min-width:220px;flex:1" />
+            ${isAdmin(user) ? '<button class="btn primary" data-act="new-key">+ Key</button><button class="btn" data-act="bulk-keys">Bulk Add</button>' : ''}
+          </div>
+        </div>
+        <div class="stats-2" style="margin-bottom:14px">
+          <div class="stat"><div class="k">ทั้งหมด</div><div class="v">${items.length}</div></div>
+          <div class="stat"><div class="k">มองเห็นได้ตอนนี้</div><div class="v">${list.length}</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th><th>Status</th><th>Assigned</th><th>Visibility</th><th>Created</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(k => keyRow(k)).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${list.length ? '' : '<div class="empty" style="margin-top:12px">ไม่พบคีย์</div>'}
+      </div>
+    `;
+  }
+
+  function keyRow(k){
+    const assigned = state.users.find(u => u.id === k.assignedTo);
+    const visibleText = (k.visibleTo || []).includes('all') ? 'All Users' : ((k.visibleTo || []).length ? `${(k.visibleTo || []).length} selected` : 'Hidden');
+    return `
+      <tr>
+        <td>
+          <div class="mono">${esc(k.value)}</div>
+          <div class="sub">${esc(k.category || 'Free Fire')}</div>
+          <div class="tiny">${esc(k.note || '')}</div>
+        </td>
+        <td><span class="tag ${k.status==='stock' ? 'on' : k.status==='assigned' ? 'blue' : 'warn'}">${esc(k.status)}</span></td>
+        <td>${assigned ? esc(assigned.displayName) : '—'}</td>
+        <td>${visibleText}</td>
+        <td>${dateFmt(k.createdAt)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" data-act="copy-key" data-id="${k.id}">⧉</button>
+            ${isAdmin(currentUser()) ? `<button class="icon-btn" data-act="edit-key" data-id="${k.id}">✎</button><button class="icon-btn bad" data-act="delete-key" data-id="${k.id}">⌫</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function visibilityPage(){
+    if(!canManageKeys()) return permissionDenied();
+    const userOptions = state.users.filter(u => u.status === 'active' && u.role !== 'superadmin');
+    const items = filteredSearch(state.keys, k => `${k.value} ${k.note} ${(k.visibleTo||[]).join(' ')} ${k.assignedTo||''}`);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>Key Visibility Control</h4><p>กำหนดว่าคีย์ตัวไหนให้ user คนไหนดูได้บ้าง</p></div>
+          <div class="toolbar">
+            <input class="input" id="pageSearch" placeholder="ค้นหา..." style="min-width:220px;flex:1" />
+          </div>
+        </div>
+        <div class="note" style="margin-bottom:14px">Admin จะเห็นทุกคีย์เสมอ ส่วน User จะเห็นเฉพาะคีย์ที่อยู่ใน <b>visibleTo</b> หรือถูก assign ให้เท่านั้น</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Key</th><th>Current visibility</th><th>Assigned</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${items.map(k => {
+                const assigned = state.users.find(u => u.id === k.assignedTo);
+                return `
+                  <tr>
+                    <td>
+                      <div class="mono">${esc(k.value)}</div>
+                      <div class="tiny">${esc(k.note || '')}</div>
+                    </td>
+                    <td>${(k.visibleTo||[]).includes('all') ? '<span class="tag on">All</span>' : (k.visibleTo||[]).map(id => `<span class="tag blue">${esc((state.users.find(u => u.id===id)||{}).displayName || id)}</span>`).join(' ') || '<span class="tag off">Hidden</span>'}</td>
+                    <td>${assigned ? esc(assigned.displayName) : '—'}</td>
+                    <td><button class="btn" data-act="edit-key" data-id="${k.id}">Set Visibility</button></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function announcementsPage(){
+    const user = currentUser();
+    const list = filteredSearch(state.announcements, a => `${a.title} ${a.body}`);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>Announcements</h4><p>ข่าวสารและประกาศที่ผู้ใช้ทุกระดับสามารถอ่านได้</p></div>
+          ${canManageAnnouncements(user) ? '<button class="btn primary" data-act="new-announcement">+ ประกาศ</button>' : ''}
+        </div>
+        <div class="grid" style="gap:12px">
+          ${list.map(a => announcementCard(a)).join('')}
+        </div>
+        ${list.length ? '' : '<div class="empty" style="margin-top:12px">ยังไม่มีประกาศ</div>'}
+      </div>
+    `;
+  }
+
+  function announcementCard(a){
+    const author = state.users.find(u => u.id === a.authorId);
+    return `
+      <div class="kbox">
+        <div class="flex-between">
+          <div>
+            <div class="name">${esc(a.title)}</div>
+            <div class="tiny">${dateFmt(a.createdAt)} • ${esc(author ? author.displayName : 'System')}</div>
+          </div>
+          <span class="tag ${a.pinned ? 'warn' : 'blue'}">${a.pinned ? 'Pinned' : 'Post'}</span>
+        </div>
+        <div class="sub" style="margin-top:10px;line-height:1.7">${esc(a.body)}</div>
+        ${canManageAnnouncements(currentUser()) ? `
+          <div class="row-actions" style="margin-top:12px">
+            <button class="btn" data-act="edit-announcement" data-id="${a.id}">Edit</button>
+            <button class="btn bad" data-act="delete-announcement" data-id="${a.id}">Delete</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function reportsPage(){
+    const user = currentUser();
+    const dealers = [...state.users].filter(u => u.role !== 'superadmin').sort((a,b) => Number(b.monthSales||0) - Number(a.monthSales||0));
+    const top3 = dealers.slice(0,3);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>Reports & Rankings</h4><p>สรุปยอด, เป้า, และอันดับตัวแทน</p></div>
+          ${isAdmin(user) ? '<button class="btn" data-act="export-csv">Export CSV</button>' : ''}
+        </div>
+        <div class="stats-3" style="margin-bottom:14px">
+          ${top3.map((u, i) => `
+            <div class="stat">
+              <div class="k">#${i+1} ${esc(u.displayName)}</div>
+              <div class="v">${money(u.monthSales)}</div>
+              <div class="s">Today ${money(u.todaySales)} • ${roleBadge(u.role)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dealer</th><th>Today</th><th>Month</th><th>Targets</th><th>Rank</th></tr></thead>
+            <tbody>
+              ${dealers.map(u => `
+                <tr>
+                  <td>
+                    <div class="name">${esc(u.displayName)}</div>
+                    <div class="tiny">@${esc(u.username)}</div>
+                  </td>
+                  <td>${money(u.todaySales)}</td>
+                  <td>${money(u.monthSales)}</td>
+                  <td>
+                    <div class="tiny">${progressValue(u.todaySales, u.targetToday)}% วันนี้</div>
+                    <div class="tiny">${progressValue(u.monthSales, u.targetMonth)}% เดือนนี้</div>
+                  </td>
+                  <td>${esc(u.rank || '-')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function logsPage(){
+    if(!canViewLogs()) return permissionDenied();
+    const list = filteredSearch(state.logs, l => `${l.action} ${l.detail} ${l.actorName}`);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>Audit Logs</h4><p>เก็บการทำงานสำคัญทั้งหมดของระบบ</p></div>
+          <div class="toolbar"><input class="input" id="pageSearch" placeholder="ค้นหา log..." style="min-width:220px;flex:1" /></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead>
+            <tbody>
+              ${list.map(l => `
+                <tr>
+                  <td>${dateFmt(l.time)}</td>
+                  <td>${esc(l.actorName)}</td>
+                  <td><span class="tag blue">${esc(l.action)}</span></td>
+                  <td>${esc(l.detail || '')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${list.length ? '' : '<div class="empty" style="margin-top:12px">ยังไม่มี log</div>'}
+      </div>
+    `;
+  }
+
+  function settingsPage(){
+    if(!isAdmin()) return permissionDenied();
+    return `
+      <div class="grid g-2">
+        <div class="card">
+          <div class="section-head"><div><h4>System Settings</h4><p>ตั้งค่าหลักของระบบ</p></div></div>
+          <form id="settingsForm" class="form">
+            <div class="field"><label>ชื่อระบบ</label><input class="input" name="systemName" value="${esc(state.settings.systemName || '')}" /></div>
+            <div class="field"><label>Tagline</label><input class="input" name="tagline" value="${esc(state.settings.tagline || '')}" /></div>
+            <div class="grid g-2">
+              <div class="field"><label>สถานะปรับปรุง</label><select class="select" name="maintenance"><option value="false" ${!state.settings.maintenance?'selected':''}>Online</option><option value="true" ${state.settings.maintenance?'selected':''}>Maintenance</option></select></div>
+              <div class="field"><label>เปิดสมัครสมาชิก</label><select class="select" name="publicRegistration"><option value="true" ${state.settings.publicRegistration?'selected':''}>On</option><option value="false" ${!state.settings.publicRegistration?'selected':''}>Off</option></select></div>
+            </div>
+            <div class="grid g-2">
+              <div class="field"><label>แจ้งเตือนคีย์ใหม่</label><select class="select" name="announceNewKey"><option value="true" ${state.settings.announceNewKey?'selected':''}>On</option><option value="false" ${!state.settings.announceNewKey?'selected':''}>Off</option></select></div>
+              <div class="field"><label>นโยบายรหัสผ่าน</label><input class="input" name="passwordPolicy" value="${esc(state.settings.passwordPolicy || '')}" /></div>
+            </div>
+            <button class="btn primary" type="submit">บันทึกตั้งค่า</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="section-head"><div><h4>Backup / Restore</h4><p>Export / Import JSON และเคลียร์ข้อมูล</p></div></div>
+          <div class="inline">
+            <button class="btn primary" data-act="export-json">Export JSON</button>
+            <button class="btn" data-act="import-json">Import JSON</button>
+            <button class="btn bad" data-act="clear-data">Clear All</button>
+          </div>
+          <input id="importFile" type="file" accept="application/json" hidden />
+          <div class="note" style="margin-top:12px">แนะนำให้ export เก็บไว้ก่อนทุกครั้ง ถ้าจะทดลองฟีเจอร์เพิ่มมาก ๆ</div>
+          <div class="divider"></div>
+          <div class="flex-between"><div class="muted small">Admin Login</div><div class="badge admin">${ADMIN_USER} / ${ADMIN_PASS}</div></div>
+          <div class="flex-between" style="margin-top:10px"><div class="muted small">Total Users</div><div class="badge other">${state.users.length}</div></div>
+          <div class="flex-between" style="margin-top:10px"><div class="muted small">Total Keys</div><div class="badge other">${state.keys.length}</div></div>
+        </div>
+        <div class="card" style="grid-column:1/-1">
+          <div class="section-head"><div><h4>Session / Permissions</h4><p>สิทธิ์หลักของผู้ใช้ในระบบ</p></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Role</th><th>Access</th></tr></thead>
+              <tbody>
+                <tr><td>Owner / Super Admin</td><td>จัดการทุกอย่าง</td></tr>
+                <tr><td>Admin</td><td>จัดการผู้ใช้, คีย์, ประกาศ, logs</td></tr>
+                <tr><td>Moderator</td><td>ประกาศและดูข้อมูลบางส่วน</td></tr>
+                <tr><td>Dealer / User / Read-only</td><td>ดูของตัวเองและคีย์ที่ถูกกำหนดให้เห็น</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function profilePage(){
+    const user = currentUser();
+    return `
+      <div class="grid g-2">
+        <div class="card">
+          <div class="section-head"><div><h4>Profile</h4><p>ข้อมูลบัญชีของคุณ</p></div></div>
+          <div class="inline" style="margin-bottom:12px">
+            <div class="avatar" style="width:56px;height:56px">${esc((user.displayName||user.username||'U').slice(0,2).toUpperCase())}</div>
+            <div>
+              <div class="name" style="font-size:1.08rem">${esc(user.displayName)}</div>
+              <div class="tiny">@${esc(user.username)}</div>
+              <div style="margin-top:8px">${roleBadge(user.role)}</div>
+            </div>
+          </div>
+          <div class="small muted">Email: ${esc(user.email || '-')}</div>
+          <div class="small muted">Created: ${dateFmt(user.createdAt)}</div>
+          <div class="small muted">Status: ${esc(user.status)}</div>
+        </div>
+        <div class="card">
+          <div class="section-head"><div><h4>Change Password</h4><p>เปลี่ยนรหัสผ่านของตัวเอง</p></div></div>
+          <form id="passwordForm" class="form">
+            <div class="field"><label>รหัสผ่านเก่า</label><input class="input" type="password" name="oldPassword" required /></div>
+            <div class="field"><label>รหัสผ่านใหม่</label><input class="input" type="password" name="newPassword" required /></div>
+            <button class="btn primary" type="submit">อัปเดตรหัสผ่าน</button>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  function dealersPage(){
+    const user = currentUser();
+    const list = [...state.users].filter(u => u.role !== 'superadmin' && u.status === 'active')
+      .sort((a,b) => Number(b.monthSales||0) - Number(a.monthSales||0));
+    const limited = isAdmin(user) ? list : list.slice(0,5);
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div><h4>Dealers</h4><p>${isAdmin(user) ? 'ดูทั้งหมด' : 'ผู้ใช้งานทั่วไปเห็นได้แบบจำกัด'} </p></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Dealer</th><th>Today</th><th>Month</th><th>Role</th></tr></thead>
+            <tbody>
+              ${limited.map((u, i) => `
+                <tr>
+                  <td>#${i+1}</td>
+                  <td>
+                    <div class="name">${esc(u.displayName)}</div>
+                    <div class="tiny">@${esc(u.username)}</div>
+                  </td>
+                  <td>${money(u.todaySales)}</td>
+                  <td>${money(u.monthSales)}</td>
+                  <td>${roleBadge(u.role)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${limited.length ? '' : '<div class="empty" style="margin-top:12px">ไม่มีข้อมูล</div>'}
+      </div>
+    `;
+  }
+
+  function permissionDenied(){
+    return `<div class="card"><div class="empty">คุณไม่มีสิทธิ์เข้าถึงหน้านี้</div></div>`;
+  }
+
+  function bindPageEvents(){
+    const user = currentUser();
+    const pageSearch = $('#pageSearch');
+    if(pageSearch){
+      pageSearch.value = uiSearch;
+      pageSearch.addEventListener('input', e => {
+        uiSearch = e.target.value;
+        renderPage();
+      });
+    }
+
+    const settingsForm = $('#settingsForm');
+    if(settingsForm){
+      settingsForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(settingsForm);
+        state.settings.systemName = String(fd.get('systemName') || 'XENOMODS');
+        state.settings.tagline = String(fd.get('tagline') || '');
+        state.settings.maintenance = fd.get('maintenance') === 'true';
+        state.settings.publicRegistration = fd.get('publicRegistration') === 'true';
+        state.settings.announceNewKey = fd.get('announceNewKey') === 'true';
+        state.settings.passwordPolicy = String(fd.get('passwordPolicy') || 'min4');
+        saveState();
+        log('Update Settings', 'System settings updated');
+        toast('Saved', 'บันทึกการตั้งค่าเรียบร้อย');
+      });
+    }
+
+    const passwordForm = $('#passwordForm');
+    if(passwordForm){
+      passwordForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(passwordForm);
+        if(String(fd.get('oldPassword') || '') !== user.password) return toast('ผิดพลาด', 'รหัสผ่านเก่าไม่ถูกต้อง', 'error');
+        const newPass = String(fd.get('newPassword') || '').trim();
+        if(newPass.length < 4) return toast('ผิดพลาด', 'รหัสผ่านใหม่สั้นเกินไป', 'error');
+        user.password = newPass;
+        saveState();
+        log('Change Password', 'User changed password', user.id);
+        toast('สำเร็จ', 'อัปเดตรหัสผ่านแล้ว');
+        passwordForm.reset();
+      });
+    }
+  }
+
+  function openUserModal(user = null){
+    if(!canManageUsers()) return;
+    const isEdit = !!user;
+    const u = user ? structuredClone(user) : {id:'', username:'', displayName:'', password:'1234', email:'', role:'user', status:'active', todaySales:0, monthSales:0, totalSales:0, targetToday:0, targetMonth:0, rank:'User'};
+    const roleOptions = ['owner','superadmin','admin','moderator','dealer','user','read-only'];
+    openModal(modalShell(isEdit ? 'Edit User' : 'Create User', `
+      <form id="userForm" class="form">
+        <div class="grid g-2">
+          <div class="field"><label>Username</label><input class="input" name="username" value="${esc(u.username)}" required /></div>
+          <div class="field"><label>Display Name</label><input class="input" name="displayName" value="${esc(u.displayName)}" required /></div>
+          <div class="field"><label>Email</label><input class="input" type="email" name="email" value="${esc(u.email)}" /></div>
+          <div class="field"><label>Password</label><input class="input" type="text" name="password" value="${esc(u.password)}" required /></div>
+        </div>
+        <div class="grid g-3">
+          <div class="field"><label>Role</label>
+            <select class="select" name="role">${roleOptions.map(r => `<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Status</label>
+            <select class="select" name="status"><option value="active" ${u.status==='active'?'selected':''}>active</option><option value="inactive" ${u.status==='inactive'?'selected':''}>inactive</option><option value="banned" ${u.status==='banned'?'selected':''}>banned</option></select>
+          </div>
+          <div class="field"><label>Rank</label><input class="input" name="rank" value="${esc(u.rank)}" /></div>
+        </div>
+        <div class="grid g-3">
+          <div class="field"><label>Today Sales</label><input class="input" type="number" name="todaySales" value="${Number(u.todaySales||0)}" /></div>
+          <div class="field"><label>Month Sales</label><input class="input" type="number" name="monthSales" value="${Number(u.monthSales||0)}" /></div>
+          <div class="field"><label>Total Sales</label><input class="input" type="number" name="totalSales" value="${Number(u.totalSales||0)}" /></div>
+        </div>
+        <div class="grid g-2">
+          <div class="field"><label>Target Today</label><input class="input" type="number" name="targetToday" value="${Number(u.targetToday||0)}" /></div>
+          <div class="field"><label>Target Month</label><input class="input" type="number" name="targetMonth" value="${Number(u.targetMonth||0)}" /></div>
+        </div>
+        <input type="hidden" name="id" value="${esc(u.id)}" />
+        <div class="small muted">Admin / Super Admin สามารถแก้ role ได้ ส่วนสมาชิกทั่วไปจะถูกสร้างเป็น user ตามปกติ</div>
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" data-close>Cancel</button>
+          <button class="btn primary" type="submit">${isEdit ? 'Save' : 'Create'}</button>
+        </div>
+      </form>
+    `));
+    $('#userForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const id = String(fd.get('id') || uid('user'));
+      const next = {
+        id,
+        username: String(fd.get('username') || '').trim(),
+        displayName: String(fd.get('displayName') || '').trim(),
+        password: String(fd.get('password') || ''),
+        email: String(fd.get('email') || ''),
+        role: String(fd.get('role') || 'user'),
+        status: String(fd.get('status') || 'active'),
+        rank: String(fd.get('rank') || 'User'),
+        todaySales: Number(fd.get('todaySales') || 0),
+        monthSales: Number(fd.get('monthSales') || 0),
+        totalSales: Number(fd.get('totalSales') || 0),
+        targetToday: Number(fd.get('targetToday') || 0),
+        targetMonth: Number(fd.get('targetMonth') || 0),
+        createdAt: isEdit ? (user.createdAt || now()) : now(),
+        visibleKeyIds: user ? (user.visibleKeyIds || []) : []
+      };
+      if(!next.username || !next.displayName || !next.password) return toast('ผิดพลาด', 'กรอกข้อมูลให้ครบ', 'error');
+      if(!isEdit && state.users.some(u => u.username.toLowerCase() === next.username.toLowerCase())) return toast('ผิดพลาด', 'username ซ้ำ', 'error');
+      const idx = state.users.findIndex(u => u.id === id);
+      if(idx >= 0) state.users[idx] = { ...state.users[idx], ...next };
+      else state.users.unshift(next);
+      saveState();
+      log(isEdit ? 'Edit User' : 'Create User', next.displayName, id);
+      closeModal();
+      toast('สำเร็จ', isEdit ? 'แก้ไข user แล้ว' : 'สร้าง user แล้ว');
+      renderPage();
+    });
+  }
+
+  function openKeyModal(key = null){
+    if(!canManageKeys()) return;
+    const isEdit = !!key;
+    const k = key ? structuredClone(key) : {id:'', value:'', category:'Free Fire', status:'stock', note:'', assignedTo:'', visibleTo:['all'], expiresAt:'', visible:true};
+    const users = state.users.filter(u => u.role !== 'superadmin');
+    openModal(modalShell(isEdit ? 'Edit Key' : 'Create Key', `
+      <form id="keyForm" class="form">
+        <div class="grid g-2">
+          <div class="field"><label>Key</label><input class="input mono" name="value" value="${esc(k.value)}" placeholder="XM-FF-2026-0005" required /></div>
+          <div class="field"><label>Category</label><input class="input" name="category" value="${esc(k.category)}" /></div>
+          <div class="field"><label>Status</label>
+            <select class="select" name="status">
+              <option value="stock" ${k.status==='stock'?'selected':''}>stock</option>
+              <option value="assigned" ${k.status==='assigned'?'selected':''}>assigned</option>
+              <option value="hidden" ${k.status==='hidden'?'selected':''}>hidden</option>
+              <option value="expired" ${k.status==='expired'?'selected':''}>expired</option>
+            </select>
+          </div>
+          <div class="field"><label>Assigned To</label>
+            <select class="select" name="assignedTo">
+              <option value="">—</option>
+              ${users.map(u => `<option value="${u.id}" ${k.assignedTo===u.id?'selected':''}>${esc(u.displayName)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Note</label>
+          <textarea class="textarea" name="note">${esc(k.note || '')}</textarea>
+        </div>
+
+        <div class="grid g-2">
+          <div class="field"><label>Expires At</label><input class="input" type="date" name="expiresAt" value="${esc(k.expiresAt || '')}" /></div>
+          <div class="field">
+            <label>Visibility</label>
+            <div class="inline">
+              <label class="toggle small"><input type="checkbox" name="visibleAll" ${((k.visibleTo||[]).includes('all'))?'checked':''} /><span class="track"></span>เห็นได้ทุกคน</label>
+            </div>
+            <div class="small muted" style="margin-top:8px">ถ้าไม่เปิดเห็นทุกคน ให้เลือก user ที่อนุญาตด้านล่าง</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Allowed Users</label>
+          <div class="check-list" id="userVisibilityList">
+            ${users.map(u => `
+              <label class="check-pill ${(k.visibleTo||[]).includes(u.id) ? 'on' : ''}">
+                <input type="checkbox" name="visibleTo" value="${u.id}" ${(k.visibleTo||[]).includes(u.id) ? 'checked' : ''} />
+                ${esc(u.displayName)}
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        <input type="hidden" name="id" value="${esc(k.id)}" />
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" data-close>Cancel</button>
+          <button class="btn primary" type="submit">${isEdit ? 'Save' : 'Create'}</button>
+        </div>
+      </form>
+    `));
+    const form = $('#keyForm');
+    const visibleAll = form.querySelector('[name="visibleAll"]');
+    const boxes = $$('[name="visibleTo"]', form);
+
+    function syncVisibilityUI(){
+      const allOn = visibleAll.checked;
+      boxes.forEach(b => {
+        b.disabled = allOn;
+        b.closest('.check-pill').classList.toggle('on', allOn || b.checked);
+      });
+    }
+    visibleAll.addEventListener('change', syncVisibilityUI);
+    boxes.forEach(b => b.addEventListener('change', () => {
+      b.closest('.check-pill').classList.toggle('on', b.checked);
+    }));
+    syncVisibilityUI();
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const next = {
+        id: String(fd.get('id') || uid('key')),
+        value: String(fd.get('value') || '').trim(),
+        category: String(fd.get('category') || 'Free Fire'),
+        status: String(fd.get('status') || 'stock'),
+        note: String(fd.get('note') || ''),
+        assignedTo: String(fd.get('assignedTo') || '') || null,
+        visibleTo: fd.get('visibleAll') ? ['all'] : fd.getAll('visibleTo'),
+        createdAt: isEdit ? (k.createdAt || now()) : now(),
+        issuedAt: (fd.get('status') === 'assigned' || String(fd.get('assignedTo') || '')) ? (k.issuedAt || now()) : null,
+        expiresAt: String(fd.get('expiresAt') || ''),
+        visible: true
+      };
+      if(!next.value) return toast('ผิดพลาด', 'กรอก key', 'error');
+      if(!isEdit && state.keys.some(x => x.value.toLowerCase() === next.value.toLowerCase())) return toast('ผิดพลาด', 'key ซ้ำ', 'error');
+      const idx = state.keys.findIndex(x => x.id === next.id);
+      if(idx >= 0) state.keys[idx] = { ...state.keys[idx], ...next };
+      else state.keys.unshift(next);
+      saveState();
+      log(isEdit ? 'Edit Key' : 'Create Key', next.value, next.id);
+      if(state.settings.announceNewKey && !isEdit) toast('คีย์ใหม่', 'เพิ่มคีย์ใหม่แล้ว', 'success');
+      closeModal();
+      renderPage();
+      toast('สำเร็จ', isEdit ? 'แก้ไขคีย์แล้ว' : 'เพิ่มคีย์แล้ว');
+    });
+  }
+
+  function openBulkKeyModal(){
+    if(!canManageKeys()) return;
+    openModal(modalShell('Bulk Add Keys', `
+      <form id="bulkKeyForm" class="form">
+        <div class="field">
+          <label>วาง key หลายบรรทัด</label>
+          <textarea class="textarea mono" name="keys" placeholder="XM-FF-2026-1001&#10;XM-FF-2026-1002&#10;XM-FF-2026-1003" required></textarea>
+        </div>
+        <div class="grid g-2">
+          <div class="field"><label>Category</label><input class="input" name="category" value="Free Fire" /></div>
+          <div class="field"><label>Visibility</label>
+            <select class="select" name="visibleType">
+              <option value="all">เห็นได้ทุกคน</option>
+              <option value="selected">กำหนด user เอง</option>
+              <option value="hidden">ซ่อน</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="bulkUsersWrap" style="display:none">
+          <label>User ที่อนุญาต</label>
+          <div class="check-list">
+            ${state.users.filter(u => u.role !== 'superadmin').map(u => `
+              <label class="check-pill"><input type="checkbox" name="allowed" value="${u.id}" />${esc(u.displayName)}</label>
+            `).join('')}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" data-close>Cancel</button>
+          <button class="btn primary" type="submit">Save Keys</button>
+        </div>
+      </form>
+    `));
+    const form = $('#bulkKeyForm');
+    const sel = form.querySelector('[name="visibleType"]');
+    const wrap = $('#bulkUsersWrap');
+    sel.addEventListener('change', () => wrap.style.display = sel.value === 'selected' ? 'block' : 'none');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const lines = String(fd.get('keys') || '').split(/\r?\n/).map(v => v.trim()).filter(Boolean);
+      const unique = [...new Set(lines)];
+      if(!unique.length) return toast('ผิดพลาด', 'วาง key อย่างน้อย 1 บรรทัด', 'error');
+      const visibleType = String(fd.get('visibleType') || 'all');
+      const allowed = visibleType === 'selected' ? fd.getAll('allowed') : (visibleType === 'all' ? ['all'] : []);
+      let added = 0;
+      unique.forEach(v => {
+        if(state.keys.some(k => k.value.toLowerCase() === v.toLowerCase())) return;
+        state.keys.unshift({
+          id: uid('key'),
+          value: v,
+          category: String(fd.get('category') || 'Free Fire'),
+          status: visibleType === 'hidden' ? 'hidden' : 'stock',
+          note: 'bulk import',
+          assignedTo: null,
+          visibleTo: allowed,
+          createdAt: now(),
+          issuedAt: null,
+          expiresAt: '',
+          visible: visibleType !== 'hidden'
+        });
+        added++;
+      });
+      saveState();
+      log('Bulk Add Keys', `Added ${added} keys`);
+      closeModal();
+      renderPage();
+      toast('สำเร็จ', `เพิ่มคีย์ ${added} รายการแล้ว`);
+    });
+  }
+
+  function openAnnouncementModal(a = null){
+    if(!canManageAnnouncements()) return;
+    const isEdit = !!a;
+    const ann = a ? structuredClone(a) : {id:'', title:'', body:'', pinned:false, createdAt:now()};
+    openModal(modalShell(isEdit ? 'Edit Announcement' : 'New Announcement', `
+      <form id="annForm" class="form">
+        <div class="field"><label>Title</label><input class="input" name="title" value="${esc(ann.title)}" required /></div>
+        <div class="field"><label>Body</label><textarea class="textarea" name="body" required>${esc(ann.body || '')}</textarea></div>
+        <label class="toggle small"><input type="checkbox" name="pinned" ${ann.pinned ? 'checked' : ''} /><span class="track"></span>Pin ด้านบน</label>
+        <input type="hidden" name="id" value="${esc(ann.id)}" />
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" data-close>Cancel</button>
+          <button class="btn primary" type="submit">${isEdit ? 'Save' : 'Publish'}</button>
+        </div>
+      </form>
+    `));
+    $('#annForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const next = {
+        id: String(fd.get('id') || uid('ann')),
+        title: String(fd.get('title') || '').trim(),
+        body: String(fd.get('body') || '').trim(),
+        pinned: !!fd.get('pinned'),
+        createdAt: isEdit ? (ann.createdAt || now()) : now(),
+        authorId: currentUser().id
+      };
+      if(!next.title || !next.body) return toast('ผิดพลาด', 'กรอกข้อมูลประกาศให้ครบ', 'error');
+      const idx = state.announcements.findIndex(x => x.id === next.id);
+      if(idx >= 0) state.announcements[idx] = next;
+      else state.announcements.unshift(next);
+      saveState();
+      log(isEdit ? 'Edit Announcement' : 'Publish Announcement', next.title, next.id);
+      closeModal();
+      renderPage();
+      toast('สำเร็จ', isEdit ? 'แก้ไขประกาศแล้ว' : 'ประกาศแล้ว');
+    });
+  }
+
+  function openUserKeysModal(userId){
+    const user = state.users.find(u => u.id === userId);
+    if(!user) return;
+    const keys = visibleKeysFor(user);
+    openModal(modalShell(`Keys for ${user.displayName}`, `
+      <div class="grid" style="gap:10px">
+        ${keys.map(k => `
+          <div class="kbox">
+            <div class="flex-between">
+              <div class="mono">${esc(k.value)}</div>
+              <span class="tag ${k.status==='stock' ? 'on' : k.status==='assigned' ? 'blue' : 'warn'}">${esc(k.status)}</span>
+            </div>
+            <div class="tiny">${esc(k.category || '')}</div>
+            <div class="sub">${esc(k.note || '')}</div>
+          </div>
+        `).join('') || '<div class="empty">ไม่พบคีย์</div>'}
+      </div>
+    `, `<button class="btn primary" data-close>Close</button>`));
+  }
+
+  function bindAuthEvents(){
+    $$('.tab').forEach(btn => btn.addEventListener('click', () => {
+      currentTab = btn.dataset.tab;
+      renderAuth();
+      bindAuthEvents();
+    }));
+    const loginFormEl = $('#loginForm');
+    const registerFormEl = $('#registerForm');
+    if(loginFormEl){
+      loginFormEl.addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(loginFormEl);
+        const username = String(fd.get('username') || '').trim();
+        const password = String(fd.get('password') || '');
+        const remember = !!fd.get('remember');
+        const user = state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+        if(!user) return toast('เข้าสู่ระบบไม่สำเร็จ', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+        if(user.status === 'banned') return toast('ถูกระงับ', 'บัญชีนี้ถูกแบน', 'error');
+        state.session.userId = user.id;
+        state.session.token = uid('token');
+        state.session.remember = remember;
+        saveState();
+        log('Login', 'User logged in', user.id);
+        toast('ยินดีต้อนรับ', user.displayName);
+        currentPage = isAdmin(user) ? 'dashboard' : 'dashboard';
+        renderApp();
+      });
+    }
+    if(registerFormEl){
+      registerFormEl.addEventListener('submit', e => {
+        e.preventDefault();
+        if(!state.settings.publicRegistration) return toast('ปิดสมัคร', 'ระบบสมัครสมาชิกถูกปิดอยู่', 'error');
+        const fd = new FormData(registerFormEl);
+        const username = String(fd.get('username') || '').trim();
+        const displayName = String(fd.get('displayName') || '').trim();
+        const email = String(fd.get('email') || '').trim();
+        const password = String(fd.get('password') || '');
+        if(username.length < 3) return toast('ผิดพลาด', 'username สั้นเกินไป', 'error');
+        if(password.length < 4) return toast('ผิดพลาด', 'รหัสผ่านสั้นเกินไป', 'error');
+        if(state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) return toast('ผิดพลาด', 'username นี้มีแล้ว', 'error');
+        const user = {id:uid('user'), username, displayName, password, email, role:'user', status:'active', createdAt:now(), todaySales:0, monthSales:0, totalSales:0, targetToday:0, targetMonth:0, rank:'User', visibleKeyIds:[]};
+        state.users.unshift(user);
+        state.session.userId = user.id;
+        state.session.token = uid('token');
+        saveState();
+        log('Register', 'New user registered', user.id);
+        toast('สำเร็จ', 'สมัครสมาชิกแล้ว');
+        renderApp();
+      });
+    }
+  }
+
+  function bindAppEvents(){
+    const menuBtn = $('#menuBtn');
+    if(menuBtn) menuBtn.addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+
+    const nav = $('#nav');
+    if(nav){
+      nav.addEventListener('click', e => {
+        const btn = e.target.closest('[data-page]');
+        if(!btn) return;
+        setPage(btn.dataset.page);
+      });
+    }
+
+    const globalSearch = $('#globalSearch');
+    if(globalSearch){
+      globalSearch.addEventListener('input', e => {
+        uiSearch = e.target.value;
+        renderPage();
+      });
+    }
+
+    modalBackdrop.addEventListener('click', e => {
+      if(e.target === modalBackdrop) closeModal();
+    });
+
+    $('#importFile')?.addEventListener('change', async e => {
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      const text = await file.text();
+      try{
+        const data = JSON.parse(text);
+        state = normalize(data);
+        saveState();
+        toast('สำเร็จ', 'นำเข้าข้อมูลแล้ว');
+        renderApp();
+      }catch(err){
+        toast('ผิดพลาด', 'ไฟล์ JSON ไม่ถูกต้อง', 'error');
+      }
+      e.target.value = '';
+    });
+
+    if(!window.__xmModalBound){
+      modalBackdrop.addEventListener('input', e => {
+        const item = e.target.closest('[name="visibleAll"]');
+        if(item){
+          const form = e.target.closest('form');
+          if(!form) return;
+          const checked = item.checked;
+          $$('[name="visibleTo"]', form).forEach(cb => {
+            cb.disabled = checked;
+            cb.closest('.check-pill').classList.toggle('on', checked || cb.checked);
+          });
+        }
+      });
+
+      modalBackdrop.addEventListener('change', e => {
+        const cb = e.target.closest('[name="visibleTo"]');
+        if(cb){
+          cb.closest('.check-pill').classList.toggle('on', cb.checked);
+        }
+      });
+
+      modalBackdrop.addEventListener('submit', e => {
+        const form = e.target.closest('form');
+        if(!form) return;
+        if(form.id === 'loginForm' || form.id === 'registerForm' || form.id === 'userForm' || form.id === 'keyForm' || form.id === 'bulkKeyForm' || form.id === 'annForm') return;
+      }, true);
+      window.__xmModalBound = true;
+    }
+  }
+
+  function copyKey(id){
+    const k = state.keys.find(x => x.id === id);
+    if(!k) return;
+    const user = currentUser();
+    if(!isAdmin(user) && !(visibleKeysFor(user).some(v => v.id === k.id))) return toast('ไม่มีสิทธิ์', 'คีย์นี้ไม่ถูกอนุญาตให้ดู', 'error');
+    navigator.clipboard?.writeText(k.value).then(() => {
+      log('Copy Key', k.value, k.id);
+      toast('คัดลอกแล้ว', k.value);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = k.value;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      log('Copy Key', k.value, k.id);
+      toast('คัดลอกแล้ว', k.value);
+    });
+  }
+
+  function exportJson(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'xenomods-panel-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Export แล้ว', 'ดาวน์โหลด JSON สำเร็จ');
+    log('Export JSON', 'Backup exported');
+  }
+
+  function exportCsv(){
+    const rows = [['username','displayName','role','status','todaySales','monthSales','targetToday','targetMonth']];
+    state.users.forEach(u => rows.push([u.username,u.displayName,u.role,u.status,u.todaySales,u.monthSales,u.targetToday,u.targetMonth]));
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'xenomods-users-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Export CSV แล้ว', 'ดาวน์โหลดรายงานสำเร็จ');
+    log('Export CSV', 'Users report exported');
+  }
+
+  function init(){
+    seedIfNeeded();
+    const user = currentUser();
+    if(user){
+      if(user.status === 'banned'){
+        state.session = {userId:null, token:null, remember:false};
+        saveState();
+        toast('บัญชีถูกระงับ', 'บัญชีนี้ถูกแบน', 'error');
+        renderAuth();
+        bindAuthEvents();
+        return;
+      }
+      renderApp();
+      bindAppEvents();
+      return;
+    }
+    renderAuth();
+    bindAuthEvents();
+  }
+
+  // Handle modal form action specific event delegation
+  modalBackdrop.addEventListener('click', e => {
+    const closeBtn = e.target.closest('[data-close]');
+    if(closeBtn){ closeModal(); return; }
+
+    const btn = e.target.closest('[data-act]');
+    if(!btn) return;
+    const act = btn.dataset.act;
+    if(act === 'copy-key') copyKey(btn.dataset.id);
+  });
+
+  // Dedicated listeners after modal content exists
+  modalBackdrop.addEventListener('submit', e => {
+    const form = e.target;
+    if(form.id === 'userForm' || form.id === 'keyForm' || form.id === 'bulkKeyForm' || form.id === 'annForm' || form.id === 'settingsForm' || form.id === 'passwordForm'){
+      // forms are handled in their specific creators or bindPageEvents
+      return;
+    }
+  }, true);
+
+  // Generic action delegation on main app
+  appRoot.addEventListener('click', e => {
+    const act = e.target.closest('[data-act]');
+    if(!act) return;
+    const user = currentUser();
+
+    if(act.dataset.act === 'new-user'){ openUserModal(null); }
+    if(act.dataset.act === 'new-key'){ openKeyModal(null); }
+    if(act.dataset.act === 'bulk-keys'){ openBulkKeyModal(); }
+    if(act.dataset.act === 'new-announcement'){ openAnnouncementModal(null); }
+    if(act.dataset.act === 'export-json'){ exportJson(); }
+    if(act.dataset.act === 'export-csv'){ exportCsv(); }
+    if(act.dataset.act === 'clear-data'){
+      if(confirm('ล้างข้อมูลทั้งหมด?')){
+        localStorage.removeItem(STORAGE);
+        state = seedState();
+        uiSearch = '';
+        currentPage = 'dashboard';
+        renderAuth(); bindAuthEvents();
+      }
+    }
+    if(act.dataset.act === 'go-logs'){ currentPage = 'logs'; renderApp(); }
+    if(act.dataset.act === 'page-mykeys'){ currentPage = isAdmin(user) ? 'keys' : 'mykeys'; renderApp(); }
+    if(act.dataset.act === 'page-announcements'){ currentPage = 'announcements'; renderApp(); }
+    if(act.dataset.act === 'page-dealers'){ currentPage = 'dealers'; renderApp(); }
+    if(act.dataset.act === 'logout'){
+      state.session = {userId:null, token:null, remember:false};
+      saveState();
+      currentPage = 'dashboard';
+      uiSearch = '';
+      renderAuth(); bindAuthEvents();
+      return;
+    }
+
+    if(act.dataset.act === 'edit-user') openUserModal(state.users.find(u => u.id === act.dataset.id));
+    if(act.dataset.act === 'delete-user'){
+      if(!confirm('ลบ user นี้?')) return;
+      const id = act.dataset.id;
+      state.users = state.users.filter(u => u.id !== id);
+      state.keys.forEach(k => {
+        if(k.assignedTo === id){ k.assignedTo = null; k.status = 'stock'; k.issuedAt = null; }
+        k.visibleTo = (k.visibleTo || []).filter(v => v !== id);
+      });
+      saveState(); log('Delete User', id); renderPage(); toast('สำเร็จ', 'ลบ user แล้ว');
+    }
+    if(act.dataset.act === 'user-keys') openUserKeysModal(act.dataset.id);
+    if(act.dataset.act === 'edit-key') openKeyModal(state.keys.find(k => k.id === act.dataset.id));
+    if(act.dataset.act === 'delete-key'){
+      if(!confirm('ลบคีย์นี้?')) return;
+      state.keys = state.keys.filter(k => k.id !== act.dataset.id);
+      saveState(); log('Delete Key', act.dataset.id); renderPage(); toast('สำเร็จ', 'ลบ key แล้ว');
+    }
+    if(act.dataset.act === 'copy-key') copyKey(act.dataset.id);
+    if(act.dataset.act === 'edit-announcement') openAnnouncementModal(state.announcements.find(a => a.id === act.dataset.id));
+    if(act.dataset.act === 'delete-announcement'){
+      if(!confirm('ลบประกาศนี้?')) return;
+      state.announcements = state.announcements.filter(a => a.id !== act.dataset.id);
+      saveState(); log('Delete Announcement', act.dataset.id); renderPage(); toast('สำเร็จ', 'ลบประกาศแล้ว');
+    }
+  });
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-page]');
+    if(!btn) return;
+    const user = currentUser();
+    if(!user) return;
+    currentPage = btn.dataset.page;
+    renderApp();
+    if(window.innerWidth <= 900){
+      const sidebar = $('#sidebar');
+      sidebar && sidebar.classList.remove('open');
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeModal();
+  });
+
+  // initial bind for modals on submit
+  modalBackdrop.addEventListener('submit', e => {
+    const form = e.target;
+    if(form.id === 'settingsForm'){
+      e.preventDefault();
+      const fd = new FormData(form);
+      state.settings.systemName = String(fd.get('systemName') || 'XENOMODS');
+      state.settings.tagline = String(fd.get('tagline') || '');
+      state.settings.maintenance = fd.get('maintenance') === 'true';
+      state.settings.publicRegistration = fd.get('publicRegistration') === 'true';
+      state.settings.announceNewKey = fd.get('announceNewKey') === 'true';
+      state.settings.passwordPolicy = String(fd.get('passwordPolicy') || 'min4');
+      saveState();
+      log('Settings', 'System settings changed');
+      closeModal();
+      renderPage();
+      toast('สำเร็จ', 'บันทึกการตั้งค่าแล้ว');
+    }
+    if(form.id === 'passwordForm'){
+      e.preventDefault();
+      const fd = new FormData(form);
+      const user = currentUser();
+      if(String(fd.get('oldPassword') || '') !== user.password) return toast('ผิดพลาด', 'รหัสผ่านเก่าไม่ถูกต้อง', 'error');
+      const next = String(fd.get('newPassword') || '').trim();
+      if(next.length < 4) return toast('ผิดพลาด', 'รหัสผ่านใหม่สั้นเกินไป', 'error');
+      user.password = next;
+      saveState();
+      log('Password Change', user.displayName, user.id);
+      toast('สำเร็จ', 'เปลี่ยนรหัสผ่านแล้ว');
+      form.reset();
+    }
+  }, true);
+
+  // Make auth page interactive
+  modalBackdrop.addEventListener('click', e => {
+    if(e.target === modalBackdrop) closeModal();
+  });
+
+  // Render on start
+  init();
+})();
+</script>
+</body>
+</html>
