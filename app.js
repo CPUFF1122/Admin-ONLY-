@@ -1,0 +1,46 @@
+const sb=supabase.createClient(CFG.url,CFG.key);
+const $=s=>document.querySelector(s),baht=n=>'฿'+Number(n).toLocaleString('th-TH');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const P={menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',cart:'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h2l2.7 12.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 7H5"/>',home:'<path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',store:'<path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 6 0 2.5 2.5 0 0 0 5 0"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',next:'<path d="M9 6l6 6-6 6"/>',out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',plus:'<path d="M12 5v14M5 12h14"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',check:'<path d="M5 12l5 5 9-10"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const ic=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const cart={get:()=>JSON.parse(localStorage.getItem('cart')||'[]'),set(v){localStorage.setItem('cart',JSON.stringify(v));$('#cc').textContent=v.length}};
+let user=null,isAdmin=false,routes={};const PS={};
+async function whoami(){const{data:{session}}=await sb.auth.getSession();user=session?.user||null;isAdmin=false;if(user){const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();isAdmin=!!data?.is_admin}}
+function shrink(f,max=900){return new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(r,'image/jpeg',.85)};i.src=URL.createObjectURL(f)})}
+const grid=ps=>ps.length?`<div class="grid">${ps.map(p=>{PS[p.id]=p;return `<article class="item">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'<div class="img"></div>'}<h3>${esc(p.name)}</h3><div class="meta"><span>${baht(p.price)}</span><span class="stock">${p.stock>0?p.stock+' ชิ้น':'หมด'}</span></div><button class="btn" data-add="${p.id}" ${p.stock>0?'':'disabled'}>ใส่ตะกร้า</button></article>`}).join('')}</div>`:'<p class="mute">ยังไม่มีสินค้า</p>';
+const STATUS={pending:'รอตรวจสลิป',paid:'ชำระแล้ว',rejected:'ไม่ผ่าน'};
+const msg=(t,ok)=>$('#msg').innerHTML=t?`<div class="err" ${ok?'style="color:var(--ok)"':''}>${esc(t)}</div>`:'';
+
+function shell(){
+  const links=[['home','/','หน้าหลัก'],['store','/shop','ร้านค้า'],['card','/checkout','ชำระเงิน'],['chat','/contact','ติดต่อเรา']];
+  document.body.insertAdjacentHTML('afterbegin',`<header><div class="wrap"><button class="icon" id="mb" aria-label="เมนู">${ic('menu',24)}</button><a class="logo" href="/#/">${esc(CFG.shop)}</a><a class="pill" href="/#/checkout" aria-label="ตะกร้า">${ic('cart')}<span id="cc">${cart.get().length}</span></a>${user?`<button class="pill light" id="out">${ic('out')}ออก</button>`:`<a class="pill light" href="/#/login">${ic('user')}ลงชื่อเข้าใช้</a>`}</div></header>`);
+  document.body.insertAdjacentHTML('beforeend',`<footer>© ${new Date().getFullYear()} ${esc(CFG.shop)}</footer><div class="bg" id="bg"></div><nav class="sheet" id="sheet"><h3>เมนูนำทาง</h3>${links.map(l=>`<a href="/#${l[1]}">${ic(l[0])}<span>${l[2]}</span>${ic('next',18)}</a>`).join('')}${isAdmin?`<a href="/admin.html">${ic('gear')}<span>หลังบ้าน</span>${ic('next',18)}</a>`:''}<button class="btn ghost" id="cl">ปิดหน้าต่าง</button></nav>`);
+  const tog=o=>{$('#bg').classList.toggle('open',o);$('#sheet').classList.toggle('open',o)};
+  $('#mb').onclick=()=>tog(true);$('#bg').onclick=$('#cl').onclick=()=>tog(false);$('#sheet').onclick=e=>e.target.closest('a')&&tog(false);
+  if($('#out'))$('#out').onclick=async()=>{await sb.auth.signOut();location.href='/'};
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const p=PS[b.dataset.add],c=cart.get();if(!c.some(i=>i.id==p.id))c.push({id:p.id,name:p.name,price:p.price});cart.set(c);b.textContent='เพิ่มแล้ว'});
+}
+const authForm=reg=>{$('#app').innerHTML=`<section class="panel"><h1>${reg?'สมัครสมาชิก':'เข้าสู่ระบบ'}</h1><p class="mute">กรอกข้อมูลบัญชีของคุณด้านล่าง</p>${reg?'<label for="u">ชื่อผู้ใช้</label><input id="u" autocomplete="username">':''}<label for="e">ที่อยู่อีเมล</label><input id="e" type="email" autocomplete="email"><label for="p">รหัสผ่าน</label><input id="p" type="password" autocomplete="${reg?'new':'current'}-password">${reg?'<label for="p2">ยืนยันรหัสผ่าน</label><input id="p2" type="password" autocomplete="new-password">':''}<div id="msg"></div><button class="btn" id="go">${reg?'สมัครสมาชิก':'เข้าสู่ระบบ'}</button><p class="mute" style="text-align:center;margin-top:16px">${reg?'มีบัญชีแล้วใช่ไหม? <a href="/#/login">เข้าสู่ระบบ</a>':'ยังไม่มีบัญชีใช่ไหม? <a href="/#/register">สมัครสมาชิก</a>'}</p></section>`;
+  $('#go').onclick=async()=>{const e=$('#e').value.trim(),p=$('#p').value;let r;
+    if(reg){if(p.length<8)return msg('รหัสผ่านต้องมีอย่างน้อย 8 ตัว');if(p!==$('#p2').value)return msg('รหัสผ่านไม่ตรงกัน');r=await sb.auth.signUp({email:e,password:p,options:{data:{username:$('#u').value.trim()}}})}
+    else r=await sb.auth.signInWithPassword({email:e,password:p});
+    if(r.error)return msg(r.error.message);location.href='/'}};
+
+const R={};
+R['/']=async()=>{const[{data:ps=[]},{data:st}]=await Promise.all([sb.from('products').select('*').order('created_at',{ascending:false}),sb.rpc('store_stats')]);
+  $('#app').innerHTML=`<section class="stats"><div>ผู้ใช้งาน<b>${st?.users??0} <span>คน</span></b></div><div>การสั่งซื้อ<b>${st?.orders??0} <span>ครั้ง</span></b></div><div>รายการสินค้า<b>${ps.length} <span>ชิ้น</span></b></div><div>สต็อกคงเหลือ<b>${ps.reduce((s,p)=>s+p.stock,0)} <span>ชิ้น</span></b></div></section><div class="row"><h2>สินค้าแนะนำ</h2><a class="mute" href="/#/shop">ดูทั้งหมด</a></div>${grid(ps.slice(0,4))}`};
+R['/shop']=async()=>{const{data:ps=[]}=await sb.from('products').select('*').order('created_at',{ascending:false});$('#app').innerHTML=`<h2>ร้านค้า</h2>${grid(ps)}`};
+R['/contact']=()=>{$('#app').innerHTML=`<section class="panel"><h1>ติดต่อเรา</h1><p class="mute">มีปัญหาเรื่องออเดอร์ ทักแอดมินได้เลย</p><a class="btn" href="${esc(CFG.contact)}" target="_blank" rel="noopener">${ic('chat')} ทักแอดมิน</a></section>`};
+R['/login']=()=>authForm(false);R['/register']=()=>authForm(true);
+R['/checkout']=async()=>{if(!user){location.hash='/login';return}
+  const items=cart.get(),total=items.reduce((s,i)=>s+Number(i.price),0),{data:os=[]}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+  $('#app').innerHTML=`<section class="panel"><h1>ชำระเงิน</h1><p class="mute">โอนเงินแล้วแนบสลิป แอดมินจะตรวจและส่งสินค้าให้</p>${items.length?`${items.map(i=>`<div class="row card"><span>${esc(i.name)}</span><span>${baht(i.price)} <button class="link" data-rm="${i.id}" aria-label="ลบ">${ic('x',16)}</button></span></div>`).join('')}<p><b>ยอดรวม ${baht(total)}</b></p><p class="mute">${esc(CFG.promptpay)}</p>${CFG.qr?`<img src="${esc(CFG.qr)}" alt="QR" style="width:200px;border-radius:16px;margin-top:10px">`:''}<label for="slip">แนบสลิปโอนเงิน</label><input id="slip" type="file" accept="image/*"><div id="msg"></div><button class="btn" id="pay">ยืนยันการชำระเงิน</button>`:`<div class="err">ยังไม่มีคำสั่งซื้อ กรุณาเลือกสินค้าก่อน</div><a class="btn" href="/#/shop">ไปเลือกสินค้า</a>`}</section><h2>คำสั่งซื้อของฉัน</h2>${os.map(o=>`<div class="card"><div class="row"><b>#${o.id} · ${baht(o.total)}</b><span class="tag ${o.status}">${STATUS[o.status]}</span></div><p class="mute">${o.items.map(i=>esc(i.name)).join(', ')}</p>${o.delivery?`<p style="margin-top:8px;white-space:pre-wrap">${esc(o.delivery)}</p>`:''}</div>`).join('')||'<p class="mute">ยังไม่มีประวัติ</p>'}`;
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{cart.set(cart.get().filter(i=>i.id!=b.dataset.rm));R['/checkout']()});
+  if($('#pay'))$('#pay').onclick=async()=>{const f=$('#slip').files[0];if(!f)return msg('กรุณาแนบสลิป');$('#pay').disabled=true;
+    const path=`${user.id}/${Date.now()}.jpg`,up=await sb.storage.from('slips').upload(path,await shrink(f),{contentType:'image/jpeg'});
+    if(up.error){$('#pay').disabled=false;return msg(up.error.message)}
+    const r=await sb.from('orders').insert({user_id:user.id,items:items,slip_url:path});
+    if(r.error){$('#pay').disabled=false;return msg(r.error.message)}
+    cart.set([]);R['/checkout']()}};
+async function route(){await(routes[location.hash.slice(1)||'/']||routes['/'])()}
+async function boot(r){routes=r;await whoami();shell();addEventListener('hashchange',route);route()}
